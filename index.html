@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карта аэропорта</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="map-container" id="map-container">
+    <div class="zoomable" id="zoomable">
+      <img src="scheme.svg" alt="Карта аэропорта" id="map">
+      <div class="marker" id="marker">
+        <img src="you.png" alt="You">
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <img src="you.png" alt="Иконка" class="info-icon">
+    <span>Вы здесь</span>
+  </div>
+
+  <script>
+    const marker = document.getElementById('marker');
+    const params = new URLSearchParams(window.location.search);
+    const point = params.get('point');
+
+    // Координаты для разных точек внутри SVG (нормализованные, относительно 100%)
+    const positions = {
+      'registration': { x: 67, y: 60 }, // Пример: 67% по X, 60% по Y
+      'cafe': { x: 72, y: 36 },
+      'foodcourt': { x: 28, y: 40 }
+    };
+
+    const zoomable = document.getElementById('zoomable');
+    const map = document.getElementById('map');
+
+    let scale = 1;
+    let currentX = 0, currentY = 0;
+    let isDragging = false;
+    let startX, startY;
+
+    const setMarkerPosition = () => {
+      if (point && positions[point]) {
+        const { x, y } = positions[point];
+
+        marker.style.left = `${x}%`;
+        marker.style.top = `${y}%`;
+        marker.style.transform = `translate(-50%, -50%) scale(${1 / scale})`; // Учитываем масштаб для маркера
+
+      } else {
+        marker.style.display = 'none';
+      }
+    };
+
+    const updateTransform = () => {
+      zoomable.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+    };
+
+    document.getElementById('map-container').addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomAmount = 0.1;
+      const delta = e.deltaY > 0 ? -zoomAmount : zoomAmount;
+      const newScale = Math.min(Math.max(scale + delta, 0.5), 5); // Ограничиваем масштаб
+
+      const rect = zoomable.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+
+      const ratio = newScale / scale;
+      currentX = offsetX - (offsetX - currentX) * ratio;
+      currentY = offsetY - (offsetY - currentY) * ratio;
+
+      scale = newScale;
+      setMarkerPosition(); // Пересчитываем позицию маркера при изменении масштаба
+      updateTransform();
+    });
+
+    zoomable.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX - currentX;
+      startY = e.clientY - currentY;
+      zoomable.style.cursor = 'grabbing';
+    });
+
+    zoomable.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX - currentX;
+      startY = e.touches[0].clientY - currentY;
+      zoomable.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      currentX = e.clientX - startX;
+      currentY = e.clientY - startY;
+      updateTransform();
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX - startX;
+      currentY = e.touches[0].clientY - startY;
+      updateTransform();
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      zoomable.style.cursor = 'grab';
+    });
+
+    document.addEventListener('touchend', () => {
+      isDragging = false;
+      zoomable.style.cursor = 'grab';
+    });
+
+    // Установить начальную позицию маркера при загрузке страницы
+    setMarkerPosition();
+  </script>
+</body>
+</html>
