@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes">
   <title>Карта аэропорта</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -22,6 +22,7 @@
   <script>
     const zoomable = document.getElementById('zoomable');
     const map = document.getElementById('map');
+    const mapContainer = document.getElementById('map-container');
 
     let scale = 1;
     let currentX = 0, currentY = 0;
@@ -36,19 +37,23 @@
 
     // Ограничение карты при масштабировании
     const updateBounds = () => {
+      const containerRect = mapContainer.getBoundingClientRect();
       const zoomableRect = zoomable.getBoundingClientRect();
-      const maxX = Math.max(0, window.innerWidth - zoomableRect.width);
-      const maxY = Math.max(0, window.innerHeight - zoomableRect.height);
 
-      currentX = Math.min(Math.max(currentX, maxX), 0);
-      currentY = Math.min(Math.max(currentY, maxY), 0);
+      const minX = containerRect.width - zoomableRect.width;
+      const minY = containerRect.height - zoomableRect.height;
+
+      currentX = Math.max(minX, Math.min(0, currentX));
+      currentY = Math.max(minY, Math.min(0, currentY));
     };
 
-    document.getElementById('map-container').addEventListener('wheel', (e) => {
+
+    mapContainer.addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomAmount = 0.1;
       const delta = e.deltaY > 0 ? -zoomAmount : zoomAmount;
-      const newScale = Math.min(Math.max(scale + delta, 0.5), 5);
+      let newScale = scale + delta;
+      newScale = Math.max(0.5, Math.min(5, newScale)); // Corrected line
 
       const rect = zoomable.getBoundingClientRect();
       const offsetX = e.clientX - rect.left;
@@ -63,23 +68,28 @@
       updateTransform();
     });
 
-    zoomable.addEventListener('mousedown', (e) => {
+
+    mapContainer.addEventListener('mousedown', (e) => {
       isDragging = true;
       startX = e.clientX - currentX;
       startY = e.clientY - currentY;
       zoomable.style.cursor = 'grabbing';
     });
 
-    zoomable.addEventListener('touchstart', (e) => {
+
+    mapContainer.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
         initialDistance = getDistance(e.touches[0], e.touches[1]);
         initialScale = scale;
+        isDragging = false; // Disable single-touch dragging when using pinch zoom
+      } else {
+        isDragging = true;
+        startX = e.touches[0].clientX - currentX;
+        startY = e.touches[0].clientY - currentY;
+        zoomable.style.cursor = 'grabbing';
       }
-      isDragging = true;
-      startX = e.touches[0].clientX - currentX;
-      startY = e.touches[0].clientY - currentY;
-      zoomable.style.cursor = 'grabbing';
     });
+
 
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
@@ -89,24 +99,32 @@
       updateTransform();
     });
 
+
     document.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
+      e.preventDefault(); // Prevent default touch behavior
+
       if (e.touches.length === 2) {
+        // Pinch zoom
         const currentDistance = getDistance(e.touches[0], e.touches[1]);
-        const scaleFactor = currentDistance / initialDistance;
-        scale = Math.min(Math.max(initialScale * scaleFactor, 0.5), 5);
+        let scaleFactor = currentDistance / initialDistance;
+        let newScale = initialScale * scaleFactor;
+
+        newScale = Math.max(0.5, Math.min(5, newScale));
 
         const rect = zoomable.getBoundingClientRect();
-        const offsetX = e.touches[0].clientX - rect.left;
-        const offsetY = e.touches[0].clientY - rect.top;
+        const offsetX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+        const offsetY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
-        const ratio = scale / initialScale;
+
+        const ratio = newScale / scale;
         currentX = offsetX - (offsetX - currentX) * ratio;
         currentY = offsetY - (offsetY - currentY) * ratio;
 
+        scale = newScale;
         updateBounds();
         updateTransform();
-      } else {
+      } else if (isDragging) {
+        // Single-finger drag
         currentX = e.touches[0].clientX - startX;
         currentY = e.touches[0].clientY - startY;
         updateBounds();
@@ -114,14 +132,25 @@
       }
     });
 
+
     document.addEventListener('mouseup', () => {
       isDragging = false;
       zoomable.style.cursor = 'grab';
     });
 
-    document.addEventListener('touchend', () => {
-      isDragging = false;
-      zoomable.style.cursor = 'grab';
+
+    document.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+          isDragging = false;
+          initialDistance = null;
+          zoomable.style.cursor = 'grab';
+      } else if (e.touches.length === 1) {
+          // Continue dragging after releasing one finger
+          isDragging = true;
+          startX = e.touches[0].clientX - currentX;
+          startY = e.touches[0].clientY - currentY;
+          zoomable.style.cursor = 'grabbing';
+      }
     });
 
     function getDistance(touch1, touch2) {
