@@ -33,6 +33,16 @@
       zoomable.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
     };
 
+    // Ограничение карты при масштабировании
+    const updateBounds = () => {
+      const zoomableRect = zoomable.getBoundingClientRect();
+      const maxX = Math.max(0, window.innerWidth - zoomableRect.width);
+      const maxY = Math.max(0, window.innerHeight - zoomableRect.height);
+
+      currentX = Math.min(Math.max(currentX, maxX), 0);
+      currentY = Math.min(Math.max(currentY, maxY), 0);
+    };
+
     document.getElementById('map-container').addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomAmount = 0.1;
@@ -48,6 +58,7 @@
       currentY = offsetY - (offsetY - currentY) * ratio;
 
       scale = newScale;
+      updateBounds();
       updateTransform();
     });
 
@@ -73,6 +84,7 @@
       if (!isDragging) return;
       currentX = e.clientX - startX;
       currentY = e.clientY - startY;
+      updateBounds();
       updateTransform();
     });
 
@@ -91,18 +103,12 @@
         currentX = offsetX - (offsetX - currentX) * ratio;
         currentY = offsetY - (offsetY - currentY) * ratio;
 
-        // Ограничение движения карты, чтобы она не выходила за пределы экрана
-        const zoomableRect = zoomable.getBoundingClientRect();
-        const maxX = Math.max(0, window.innerWidth - zoomableRect.width);
-        const maxY = Math.max(0, window.innerHeight - zoomableRect.height);
-
-        currentX = Math.min(Math.max(currentX, maxX), 0);
-        currentY = Math.min(Math.max(currentY, maxY), 0);
-
+        updateBounds();
         updateTransform();
       } else {
         currentX = e.touches[0].clientX - startX;
         currentY = e.touches[0].clientY - startY;
+        updateBounds();
         updateTransform();
       }
     });
