@@ -12,7 +12,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-x pan-y; /* Разрешаем прокрутку по горизонтали и вертикали */
 }
 
 .zoomable {
@@ -32,21 +32,6 @@ html, body {
   display: block;
   pointer-events: none;
   user-select: none;
-}
-
-.marker {
-  position: absolute;
-  width: 4vw; /* Изменил на vw */
-  aspect-ratio: 1 / 1;
-  transform-origin: center center;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.marker img {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 .info-box {
@@ -84,9 +69,5 @@ html, body {
   .info-icon {
     width: 16px;
     height: 16px;
-  }
-
-  .marker {
-    top: calc(20%); /*  Пример: Корректировка позиции для мобильных */
   }
 }
