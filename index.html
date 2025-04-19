@@ -20,6 +20,19 @@
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const point = params.get('point');
+    const map = document.getElementById('map');
+
+    // Изменяем изображение карты в зависимости от параметра
+    if (point === 'registration') {
+      map.src = 'scheme_registration.svg';
+    } else if (point === 'cafe') {
+      map.src = 'scheme_cafe.svg';
+    } else if (point === 'foodcourt') {
+      map.src = 'scheme_foodhall.svg';
+    }
+    
     const zoomable = document.getElementById('zoomable');
     const map = document.getElementById('map');
     const mapContainer = document.getElementById('map-container');
