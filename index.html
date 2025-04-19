@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Карта аэропорта</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -85,10 +85,47 @@
     });
 
     zoomable.addEventListener('touchstart', (e) => {
-      isDragging = true;
-      startX = e.touches[0].clientX - currentX;
-      startY = e.touches[0].clientY - currentY;
+      if (e.touches.length === 2) { // Два пальца
+        isDragging = true;
+        startX = e.touches[0].clientX - currentX;
+        startY = e.touches[0].clientY - currentY;
+      }
       zoomable.style.cursor = 'grabbing';
+    });
+
+    zoomable.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      if (e.touches.length === 2) {
+        // Масштабирование при движении двух пальцев
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
+
+        const scaleDelta = dist / 200; // Разделим на фиксированное значение для корректного масштаба
+        const newScale = Math.min(Math.max(scale + scaleDelta, 0.5), 5); // Ограничиваем масштаб
+
+        const rect = zoomable.getBoundingClientRect();
+        const offsetX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+        const offsetY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+
+        const ratio = newScale / scale;
+        currentX = offsetX - (offsetX - currentX) * ratio;
+        currentY = offsetY - (offsetY - currentY) * ratio;
+
+        scale = newScale;
+        setMarkerPosition(); // Пересчитываем позицию маркера при изменении масштаба
+        updateTransform();
+      }
+    });
+
+    zoomable.addEventListener('mouseup', () => {
+      isDragging = false;
+      zoomable.style.cursor = 'grab';
+    });
+
+    zoomable.addEventListener('touchend', () => {
+      isDragging = false;
+      zoomable.style.cursor = 'grab';
     });
 
     document.addEventListener('mousemove', (e) => {
