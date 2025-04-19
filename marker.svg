@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <clipPath id="uo" transform="translate(-3.28 2.61)">
+   <path d="m382,1446.7l1305.78,-7.7l88.08,-50.53l278.14,4.35l-13.34,217.18l-1716.66,-17l58,-146.3z" fill="none" id="svg_1"/>
+  </clipPath>
+  <clipPath id="aiz" transform="translate(-3.28 2.61)">
+   <path d="m1834.38,173.73l-117.73,0l-0.65,49.67l118.06,0l0.32,-29.68" fill="none" id="svg_2"/>
+  </clipPath>
+  <clipPath id="ajf" transform="translate(-3.28 2.61)">
+   <path d="m2171.05,136.39l-112.81,0l0.28,87.01l113.14,0l-0.61,-37.33l0,-49.68z" fill="none" id="svg_3"/>
+  </clipPath>
+  <clipPath id="alz" transform="translate(-3.28 2.61)">
+   <path d="m284.06,1789.91l0,193.99l365.37,0l0,-109.01l114.23,0l0,109.01l50.73,0l0,-109.01l149.94,0l0,109.01l695.31,0l0,-109.01l113.64,0l0,109.01l50.73,0l0,-109.01l254.6,0l0,109.01l811.81,0l0,-109.01l454.3,0l0,109.01l175.55,0l0,-193.99l-3236.21,0z" fill="none" id="svg_4"/>
+  </clipPath>
+  <path d="m1719,129q234,-11 468,0" id="path-terrace-title"/>
+ </defs>
+ <g class="layer" display="inline">
+  <title>Layer 1</title>
+  <image height="0" id="svg_2484" width="0" x="33.55" xlink:href="./images/logo.svg" y="1290.39"/>
+  <path d="m61.46,76.21l14.89,13.67l-1.13,-27.57l-1.13,-27.57l8.85,-0.36l8.85,-0.36l1.11,27.25c0.61,14.99 1.56,27.23 2.11,27.21c0.55,-0.02 6.74,-6.25 13.77,-13.84l12.77,-13.8l0.5,12.26l0.5,12.26l-17.99,19.48l-17.99,19.48l-19.48,-17.99l-19.48,-17.99l-0.53,-12.9l-0.53,-12.9l14.89,13.67z" fill="#FF0000" id="svg_2485" opacity="0.95" stroke="#000000" stroke-width="5"/>
+ </g>
+</svg>
