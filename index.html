@@ -34,7 +34,6 @@
     let initialScale = 1;
 
     const setMarkerPosition = () => {
-      // Координаты для разных точек внутри SVG (нормализованные, относительно 100%)
       const positions = {
         'registration': { x: 67, y: 60 },
         'cafe': { x: 72, y: 36 },
@@ -58,7 +57,6 @@
       zoomable.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
     };
 
-    // Масштабирование с колесом мыши
     document.getElementById('map-container').addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomAmount = 0.1;
@@ -78,7 +76,6 @@
       updateTransform();
     });
 
-    // Перетаскивание
     zoomable.addEventListener('mousedown', (e) => {
       isDragging = true;
       startX = e.clientX - currentX;
@@ -119,6 +116,14 @@
         currentX = offsetX - (offsetX - currentX) * ratio;
         currentY = offsetY - (offsetY - currentY) * ratio;
 
+        // Ограничение движения карты, чтобы она не выходила за пределы экрана
+        const zoomableRect = zoomable.getBoundingClientRect();
+        const maxX = Math.max(0, window.innerWidth - zoomableRect.width);
+        const maxY = Math.max(0, window.innerHeight - zoomableRect.height);
+
+        currentX = Math.min(Math.max(currentX, maxX), 0);
+        currentY = Math.min(Math.max(currentY, maxY), 0);
+
         setMarkerPosition();
         updateTransform();
       } else {
@@ -144,7 +149,6 @@
       return Math.sqrt(dx * dx + dy * dy);
     }
 
-    // Установить начальную позицию маркера при загрузке страницы
     setMarkerPosition();
   </script>
 </body>
