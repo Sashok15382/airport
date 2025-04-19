@@ -20,20 +20,7 @@
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const point = params.get('point');
-    const map = document.getElementById('map');
-
-    // Изменяем изображение карты в зависимости от параметра
-    if (point === 'registration') {
-      map.src = 'scheme_registration.svg';
-    } else if (point === 'cafe') {
-      map.src = 'scheme_cafe.svg';
-    } else if (point === 'foodcourt') {
-      map.src = 'scheme_foodhall.svg';
-    }
-    
-    const zoomable = document.getElementById('zoomable');
+     const zoomable = document.getElementById('zoomable');
     const map = document.getElementById('map');
     const mapContainer = document.getElementById('map-container');
 
@@ -60,6 +47,21 @@
       currentY = Math.max(minY, Math.min(0, currentY));
     };
 
+    // Получаем параметр 'point' из URL
+    const params = new URLSearchParams(window.location.search);
+    const point = params.get('point');
+
+    // Изменяем изображение карты в зависимости от параметра
+    if (point === 'registration') {
+      map.src = 'scheme_registration.svg';
+    } else if (point === 'cafe') {
+      map.src = 'scheme_cafe.svg';
+    } else if (point === 'foodcourt') {
+      map.src = 'scheme_foodhall.svg';
+    } else {
+      // Если параметр 'point' не указан или имеет другое значение, загружаем scheme.svg
+      map.src = 'scheme.svg';
+    }
 
     mapContainer.addEventListener('wheel', (e) => {
       e.preventDefault();
@@ -81,14 +83,12 @@
       updateTransform();
     });
 
-
     mapContainer.addEventListener('mousedown', (e) => {
       isDragging = true;
       startX = e.clientX - currentX;
       startY = e.clientY - currentY;
       zoomable.style.cursor = 'grabbing';
     });
-
 
     mapContainer.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
@@ -98,11 +98,10 @@
       } else {
         isDragging = true;
         startX = e.touches[0].clientX - currentX;
-        startY = e.touches[0].clientY - currentY;
+        startY = e.clientY - currentY;
         zoomable.style.cursor = 'grabbing';
       }
     });
-
 
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
@@ -111,7 +110,6 @@
       updateBounds();
       updateTransform();
     });
-
 
     document.addEventListener('touchmove', (e) => {
       e.preventDefault(); // Prevent default touch behavior
@@ -127,7 +125,6 @@
         const rect = zoomable.getBoundingClientRect();
         const offsetX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
         const offsetY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
 
         const ratio = newScale / scale;
         currentX = offsetX - (offsetX - currentX) * ratio;
@@ -145,24 +142,22 @@
       }
     });
 
-
     document.addEventListener('mouseup', () => {
       isDragging = false;
       zoomable.style.cursor = 'grab';
     });
 
-
     document.addEventListener('touchend', (e) => {
       if (e.touches.length === 0) {
-          isDragging = false;
-          initialDistance = null;
-          zoomable.style.cursor = 'grab';
+        isDragging = false;
+        initialDistance = null;
+        zoomable.style.cursor = 'grab';
       } else if (e.touches.length === 1) {
-          // Continue dragging after releasing one finger
-          isDragging = true;
-          startX = e.touches[0].clientX - currentX;
-          startY = e.touches[0].clientY - currentY;
-          zoomable.style.cursor = 'grabbing';
+        // Continue dragging after releasing one finger
+        isDragging = true;
+        startX = e.touches[0].clientX - currentX;
+        startY = e.touches[0].clientY - currentY;
+        zoomable.style.cursor = 'grabbing';
       }
     });
 
