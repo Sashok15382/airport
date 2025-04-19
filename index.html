@@ -10,9 +10,6 @@
   <div class="map-container" id="map-container">
     <div class="zoomable" id="zoomable">
       <img src="scheme_cafe.svg" alt="Карта аэропорта" id="map">
-      <div class="marker" id="marker">
-        <img src="you.png" alt="You">
-      </div>
     </div>
   </div>
 
@@ -22,7 +19,6 @@
   </div>
 
   <script>
-    const marker = document.getElementById('marker');
     const zoomable = document.getElementById('zoomable');
     const map = document.getElementById('map');
 
@@ -32,26 +28,6 @@
     let startX, startY;
     let initialDistance = null;
     let initialScale = 1;
-
-    const setMarkerPosition = () => {
-      const positions = {
-        'registration': { x: 67, y: 60 },
-        'cafe': { x: 72, y: 36 },
-        'foodcourt': { x: 28, y: 40 }
-      };
-
-      const params = new URLSearchParams(window.location.search);
-      const point = params.get('point');
-
-      if (point && positions[point]) {
-        const { x, y } = positions[point];
-        marker.style.left = `${x}%`;
-        marker.style.top = `${y}%`;
-        marker.style.transform = `translate(-50%, -50%) scale(${1 / scale})`;
-      } else {
-        marker.style.display = 'none';
-      }
-    };
 
     const updateTransform = () => {
       zoomable.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
@@ -72,7 +48,6 @@
       currentY = offsetY - (offsetY - currentY) * ratio;
 
       scale = newScale;
-      setMarkerPosition();
       updateTransform();
     });
 
@@ -124,7 +99,6 @@
         currentX = Math.min(Math.max(currentX, maxX), 0);
         currentY = Math.min(Math.max(currentY, maxY), 0);
 
-        setMarkerPosition();
         updateTransform();
       } else {
         currentX = e.touches[0].clientX - startX;
@@ -148,8 +122,6 @@
       const dy = touch2.clientY - touch1.clientY;
       return Math.sqrt(dx * dx + dy * dy);
     }
-
-    setMarkerPosition();
   </script>
 </body>
 </html>
