@@ -1,0 +1,92 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgb(10, 102, 204);
+  font-family: sans-serif;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.zoomable {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  cursor: grab;
+  width: 100%;
+  height: 100%;
+}
+
+.zoomable img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.marker {
+  position: absolute;
+  width: 4vw; /* Изменил на vw */
+  aspect-ratio: 1 / 1;
+  transform-origin: center center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.marker img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.info-box {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  z-index: 20;
+}
+
+.info-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.info-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .info-box {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .info-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .marker {
+    top: calc(20%); /*  Пример: Корректировка позиции для мобильных */
+  }
+}
