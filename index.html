@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Карта аэропорта</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
   <div class="map-container" id="map-container">
     <div class="zoomable" id="zoomable">
-      <img src="scheme.svg" alt="Карта аэропорта" id="map">
+      <img src="scheme_cafe.svg" alt="Карта аэропорта" id="map">
+      <div class="marker" id="marker">
+        <img src="you.png" alt="You">
+      </div>
     </div>
   </div>
 
@@ -20,35 +22,48 @@
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const point = params.get('point');
+    const marker = document.getElementById('marker');
+    const zoomable = document.getElementById('zoomable');
     const map = document.getElementById('map');
 
-    // Изменяем изображение карты в зависимости от параметра
-    if (point === 'registration') {
-      map.src = 'scheme_registration.svg';
-    } else if (point === 'cafe') {
-      map.src = 'scheme_cafe.svg';
-    } else if (point === 'foodcourt') {
-      map.src = 'scheme_foodhall.svg';
-    }
-
-    // Zoom & pan (остаётся без изменений)
-    const zoomable = document.getElementById('zoomable');
     let scale = 1;
     let currentX = 0, currentY = 0;
     let isDragging = false;
     let startX, startY;
+    let initialDistance = null;
+    let initialScale = 1;
+
+    const setMarkerPosition = () => {
+      // Координаты для разных точек внутри SVG (нормализованные, относительно 100%)
+      const positions = {
+        'registration': { x: 67, y: 60 },
+        'cafe': { x: 72, y: 36 },
+        'foodcourt': { x: 28, y: 40 }
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const point = params.get('point');
+
+      if (point && positions[point]) {
+        const { x, y } = positions[point];
+        marker.style.left = `${x}%`;
+        marker.style.top = `${y}%`;
+        marker.style.transform = `translate(-50%, -50%) scale(${1 / scale})`;
+      } else {
+        marker.style.display = 'none';
+      }
+    };
 
     const updateTransform = () => {
       zoomable.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
     };
 
+    // Масштабирование с колесом мыши
     document.getElementById('map-container').addEventListener('wheel', (e) => {
       e.preventDefault();
       const zoomAmount = 0.1;
       const delta = e.deltaY > 0 ? -zoomAmount : zoomAmount;
-      const newScale = Math.min(Math.max(scale + delta, 0.5), 5); // Ограничиваем масштаб
+      const newScale = Math.min(Math.max(scale + delta, 0.5), 5);
 
       const rect = zoomable.getBoundingClientRect();
       const offsetX = e.clientX - rect.left;
@@ -59,9 +74,11 @@
       currentY = offsetY - (offsetY - currentY) * ratio;
 
       scale = newScale;
+      setMarkerPosition();
       updateTransform();
     });
 
+    // Перетаскивание
     zoomable.addEventListener('mousedown', (e) => {
       isDragging = true;
       startX = e.clientX - currentX;
@@ -70,6 +87,10 @@
     });
 
     zoomable.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        initialDistance = getDistance(e.touches[0], e.touches[1]);
+        initialScale = scale;
+      }
       isDragging = true;
       startX = e.touches[0].clientX - currentX;
       startY = e.touches[0].clientY - currentY;
@@ -85,9 +106,26 @@
 
     document.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
-      currentX = e.touches[0].clientX - startX;
-      currentY = e.touches[0].clientY - startY;
-      updateTransform();
+      if (e.touches.length === 2) {
+        const currentDistance = getDistance(e.touches[0], e.touches[1]);
+        const scaleFactor = currentDistance / initialDistance;
+        scale = Math.min(Math.max(initialScale * scaleFactor, 0.5), 5);
+
+        const rect = zoomable.getBoundingClientRect();
+        const offsetX = e.touches[0].clientX - rect.left;
+        const offsetY = e.touches[0].clientY - rect.top;
+
+        const ratio = scale / initialScale;
+        currentX = offsetX - (offsetX - currentX) * ratio;
+        currentY = offsetY - (offsetY - currentY) * ratio;
+
+        setMarkerPosition();
+        updateTransform();
+      } else {
+        currentX = e.touches[0].clientX - startX;
+        currentY = e.touches[0].clientY - startY;
+        updateTransform();
+      }
     });
 
     document.addEventListener('mouseup', () => {
@@ -99,6 +137,15 @@
       isDragging = false;
       zoomable.style.cursor = 'grab';
     });
+
+    function getDistance(touch1, touch2) {
+      const dx = touch2.clientX - touch1.clientX;
+      const dy = touch2.clientY - touch1.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Установить начальную позицию маркера при загрузке страницы
+    setMarkerPosition();
   </script>
 </body>
 </html>
