@@ -34,6 +34,12 @@
       touchAction: "none" // Отключение стандартного действия прикосновения
     });
 
+    // Включение масштабирования через колесико мыши
+    zoomable.parentElement.addEventListener('wheel', (event) => {
+      event.preventDefault(); // предотвращаем прокрутку страницы
+      panzoomInstance.zoomWithWheel(event);
+    });
+
     // Получаем параметр 'point' из URL
     const params = new URLSearchParams(window.location.search);
     const point = params.get('point');
