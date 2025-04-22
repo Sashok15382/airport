@@ -26,11 +26,12 @@
 
     // Инициализация Panzoom
     const panzoomInstance = panzoom(zoomable, {
-      maxZoom: 5,       // Максимальный уровень зума
-      minZoom: 0.5,     // Минимальный уровень зума
+      maxScale: 5,       // Максимальный уровень зума
+      minScale: 0.5,     // Минимальный уровень зума
       zoomDoubleClick: true, // Увеличение по двойному клику
       bounds: true,      // Ограничивать перемещение
-      boundsPadding: 0   // Отступы для границ
+      boundsPadding: 0,  // Отступы для границ
+      touchAction: "none" // Отключение стандартного действия прикосновения
     });
 
     // Получаем параметр 'point' из URL
