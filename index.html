@@ -6,6 +6,7 @@
   <title>Карта аэропорта</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/panzoom/9.6.1/panzoom.min.js"></script>
 </head>
 <body>
   <div class="map-container" id="map-container">
@@ -20,32 +21,17 @@
   </div>
 
   <script>
-     const zoomable = document.getElementById('zoomable');
+    const zoomable = document.getElementById('zoomable');
     const map = document.getElementById('map');
-    const mapContainer = document.getElementById('map-container');
 
-    let scale = 1;
-    let currentX = 0, currentY = 0;
-    let isDragging = false;
-    let startX, startY;
-    let initialDistance = null;
-    let initialScale = 1;
-
-    const updateTransform = () => {
-      zoomable.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
-    };
-
-    // Ограничение карты при масштабировании
-    const updateBounds = () => {
-      const containerRect = mapContainer.getBoundingClientRect();
-      const zoomableRect = zoomable.getBoundingClientRect();
-
-      const minX = containerRect.width - zoomableRect.width;
-      const minY = containerRect.height - zoomableRect.height;
-
-      currentX = Math.max(minX, Math.min(0, currentX));
-      currentY = Math.max(minY, Math.min(0, currentY));
-    };
+    // Инициализация Panzoom
+    const panzoomInstance = panzoom(zoomable, {
+      maxZoom: 5,       // Максимальный уровень зума
+      minZoom: 0.5,     // Минимальный уровень зума
+      zoomDoubleClick: true, // Увеличение по двойному клику
+      bounds: true,      // Ограничивать перемещение
+      boundsPadding: 0   // Отступы для границ
+    });
 
     // Получаем параметр 'point' из URL
     const params = new URLSearchParams(window.location.search);
@@ -61,110 +47,6 @@
     } else {
       // Если параметр 'point' не указан или имеет другое значение, загружаем scheme.svg
       map.src = 'scheme.svg';
-    }
-
-    mapContainer.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const zoomAmount = 0.1;
-      const delta = e.deltaY > 0 ? -zoomAmount : zoomAmount;
-      let newScale = scale + delta;
-      newScale = Math.max(0.5, Math.min(5, newScale)); // Corrected line
-
-      const rect = zoomable.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      const offsetY = e.clientY - rect.top;
-
-      const ratio = newScale / scale;
-      currentX = offsetX - (offsetX - currentX) * ratio;
-      currentY = offsetY - (offsetY - currentY) * ratio;
-
-      scale = newScale;
-      updateBounds();
-      updateTransform();
-    });
-
-    mapContainer.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      startX = e.clientX - currentX;
-      startY = e.clientY - currentY;
-      zoomable.style.cursor = 'grabbing';
-    });
-
-    mapContainer.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 2) {
-        initialDistance = getDistance(e.touches[0], e.touches[1]);
-        initialScale = scale;
-        isDragging = false; // Disable single-touch dragging when using pinch zoom
-      } else {
-        isDragging = true;
-        startX = e.touches[0].clientX - currentX;
-        startY = e.clientY - currentY;
-        zoomable.style.cursor = 'grabbing';
-      }
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      currentX = e.clientX - startX;
-      currentY = e.clientY - startY;
-      updateBounds();
-      updateTransform();
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      e.preventDefault(); // Prevent default touch behavior
-
-      if (e.touches.length === 2) {
-        // Pinch zoom
-        const currentDistance = getDistance(e.touches[0], e.touches[1]);
-        let scaleFactor = currentDistance / initialDistance;
-        let newScale = initialScale * scaleFactor;
-
-        newScale = Math.max(0.5, Math.min(5, newScale));
-
-        const rect = zoomable.getBoundingClientRect();
-        const offsetX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-        const offsetY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
-        const ratio = newScale / scale;
-        currentX = offsetX - (offsetX - currentX) * ratio;
-        currentY = offsetY - (offsetY - currentY) * ratio;
-
-        scale = newScale;
-        updateBounds();
-        updateTransform();
-      } else if (isDragging) {
-        // Single-finger drag
-        currentX = e.touches[0].clientX - startX;
-        currentY = e.touches[0].clientY - startY;
-        updateBounds();
-        updateTransform();
-      }
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDragging = false;
-      zoomable.style.cursor = 'grab';
-    });
-
-    document.addEventListener('touchend', (e) => {
-      if (e.touches.length === 0) {
-        isDragging = false;
-        initialDistance = null;
-        zoomable.style.cursor = 'grab';
-      } else if (e.touches.length === 1) {
-        // Continue dragging after releasing one finger
-        isDragging = true;
-        startX = e.touches[0].clientX - currentX;
-        startY = e.touches[0].clientY - currentY;
-        zoomable.style.cursor = 'grabbing';
-      }
-    });
-
-    function getDistance(touch1, touch2) {
-      const dx = touch2.clientX - touch1.clientX;
-      const dy = touch2.clientY - touch1.clientY;
-      return Math.sqrt(dx * dx + dy * dy);
     }
   </script>
 </body>
