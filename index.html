@@ -40,6 +40,19 @@
       panzoomInstance.zoomWithWheel(event);
     });
 
+    // Обработчик для касаний
+    zoomable.parentElement.addEventListener('touchmove', (event) => {
+      if (event.touches.length === 2) {
+        // Увеличиваем чувствительность зума при использовании двух пальцев
+        const scaleChange = 0.1; // Измените это значение для регулировки чувствительности
+        const distance = getDistance(event.touches[0], event.touches[1]);
+        const currentScale = panzoomInstance.getScale();
+        let newScale = currentScale + scaleChange;
+
+        panzoomInstance.zoom(newScale);
+      }
+    });
+
     // Получаем параметр 'point' из URL
     const params = new URLSearchParams(window.location.search);
     const point = params.get('point');
